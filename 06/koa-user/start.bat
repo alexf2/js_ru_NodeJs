@@ -1,0 +1,1 @@
+cross-env TRACE=true node index 

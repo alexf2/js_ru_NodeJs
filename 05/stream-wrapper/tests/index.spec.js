@@ -1,6 +1,8 @@
 const should = require('should')
 
 should(process.env.NODE_ENV).eql('test') //do not forget to set env properly: cross-env NODE_ENV=test mocha server.spec.js
+
+const Promise = require('bluebird')
 const fs = require('fs-extra-promise')
 const stream = require('stream')
 const path = require('path')
@@ -73,8 +75,11 @@ describe('streamReader', () => {
         streamOut.end()
         streamOut.destroy()
 
-        fs.statSync(bigFixture).size.should.be.equal(fs.statSync(bigFilePath).size)
-        fs.readFileSync(bigFixture).should.eql(fs.readFileSync(bigFilePath))
+	const [statFixture, statFile] = await Promise.all([fs.statAsync(bigFixture), fs.statAsync(bigFilePath)])
+        statFixture.size.should.be.equal(statFile.size)
+
+	const [buffFixture, buffFile] = await Promise.all([fs.readFileAsync(bigFixture), fs.readFileAsync(bigFilePath)])
+        buffFixture.should.eql(buffFile)
     }).timeout(20000)
 
     it('Copying a small file with delay', async () => {
